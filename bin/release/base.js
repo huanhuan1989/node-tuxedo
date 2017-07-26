@@ -3,7 +3,6 @@ import Files from 'files'
 import Cdn from 'cdn'
 import promise from 'promise'
 
-
 /**
  * Base 方法
  */

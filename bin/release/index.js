@@ -1,5 +1,8 @@
 import Base from 'base'
 
+/**
+ * Release
+ */
 class Release extends Base{
 
     constructor (...arg) {
@@ -28,8 +31,6 @@ class Release extends Base{
       return data
     }
 
-    
-
     reduceArrayFilesByTypes (prev, current) {
       prev['img'] = Object.assign(
         super.getCurrentItem(prev['img'], current, 'jpg'), 
@@ -47,7 +48,6 @@ class Release extends Base{
         .map(super.getElementObject)
         .reduce(reduceArrayFilesByTypes, {img: {}})
     }
-
 }
 
 export {
