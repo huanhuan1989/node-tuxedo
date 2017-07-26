@@ -3,12 +3,13 @@ const promise = require('promise')
 const dirVars = require('../webpack-config/base/dir-vars.config.js')
 const project = require('../webpack-config/base/project.config.js')
 const utils = require('./utils')
+const fs = require("fs")
 const outputPath = dirVars.buildDir
 const rootPath = dirVars.proRootDir
 const FILTER_OUT_DIR = ['.idea', '.vscode', '.gitignore', 'node_modules']
 const FILTER_FILES_TYPE = ['js', 'css', 'html', 'jpg', 'ico', 'png']
 const FILTER_OTHER_FILES_TYPE = ['xml', 'swf']
-const MK_DIR_PATH = ['static', 'static/other', 'static/swf']   //fs.readdir
+const MK_DIR_PATH = ['static', 'static/other', 'static/swf']
 
 const getElement = elem => {
     const data = utils.getNormalize(outputPath, elem)
@@ -28,7 +29,7 @@ const getLastImgSet = data => {
     const ico = data['img']['ico']
 
     if (jpg && png && ico) {
-        const imgObj = Object.assign(jpg.obj, png.obj, ico.obj)
+        const imgObj = Object.assign({}, jpg.obj, png.obj, ico.obj)
         const imgArr = [...jpg.arr, ...png.arr, ...ico.arr]
         data['img'] = {
             obj: imgObj,
@@ -48,15 +49,10 @@ const getAllFilesSet = (prev, current) => {
         utils.getCurrentItem(prev['img'], current, 'jpg'), 
         utils.getCurrentItem(prev['img'], current, 'png'), 
         utils.getCurrentItem(prev['img'], current, 'ico'))
-
     prev[current['name']] = current[current['name']]
     prev = getLastImgSet(prev)
     
     return prev
-    /* return {
-        [current[name]]: current[current[name]],
-        ...prev
-    } */
 }
 
 const findAllFilesHandler = arr => {
@@ -182,63 +178,61 @@ const isOnline = data => {
     return utils.isDir(distDirPath)
 }
 
-const createFilesToDir = data => {
+const createFilesToDir = async data => {
     const distDirPath = `${rootPath}/online`
-    utils.createDir(distDirPath).then(type => {
-        type && writeFiles(data, distDirPath)
-        type && console.log('---files--write--done---')
-        return 'creat done!'
-    }, err => {
-        console.log('----createDir--er----', err)
-    })
+    const files = await utils.createDir(distDirPath)
+    files && writeFiles(data, distDirPath)
+    files && console.log('---files--write--done---')
 }
 
 
-const copy = (devPath, fn) => {
-    utils.isExists(devPath).then(data => {
-        if (data) {
-            const distFilesPath = devPath.replace('output', 'online')
-            const str = utils.readFileSync(devPath)
-            utils.writeFileSync(distFilesPath, str)
-            fn && fn(str)
-        }
-    })
+const copy = async (devPath) => {
+    const isExists = await utils.isExists(devPath)
+    if (isExists) {
+        const distFilesPath = devPath.replace('output', 'online')
+        const str = utils.readFileSync(devPath)
+        utils.writeFileSync(distFilesPath, str)
+        return str
+    }
+    return false
 }
 
-const copyFilesHandler = (arr, devDirPath, current) => {
+const copyFilesHandler = (arr, devDirPath, now) => {
     return arr
         .map(getElement)
-        .filter(elem => (current['name'] !== 'static'))
-        .reduce((prev, current) => {
+        .filter(elem => (now['name'] !== 'static'))
+        .reduce(async (prev, current) => {
             const itemObj = current[current['name']].obj
             for (let keys in itemObj) {
                 const devFilesPath = `${devDirPath}/${keys}`
-                copy(devFilesPath, (str) => {
+                const str = await copy(devFilesPath)
+                if(str){
                     prev[keys] = itemObj[keys]
                     prev['str'] = str
-                })
-            }
+                }
+            } 
             return prev
         }, {})
 }
 
-//copy
+/**
+ * 1. 保证先创建online -> static -> other/swf
+ * 2. 需要处理
+*/
 const copyOtherFiles = arr => {
     const devRootDirPath = `${rootPath}/output`
     const distRootDirPath = `${rootPath}/online`
     return MK_DIR_PATH
         .map(elem => ({ name: elem }))
-        .reduce((prev, current) => {
+        .reduce(async (prev, current) => {
             const devDirPath = `${devRootDirPath}/${current.name}`
             const distDirPath = `${distRootDirPath}/${current.name}`
-            prev = utils.createDir(distDirPath).then(data => {
-                return copyFilesHandler(arr, devDirPath, current)
-            }, err => {
-                console.log('----createDir--er----', err)
-            })
+            const files = await utils.createDir(distDirPath)
+            if(files || !files) {
+                prev = await copyFilesHandler(arr, devDirPath, current)
+            }
         }, {})
 }
-
 utils.upload(filesObj['img'].arr, {
     keepName: true
 })
