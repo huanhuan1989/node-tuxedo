@@ -92,6 +92,17 @@ utils.getFilesContent = (filePath) => {
     })
 }
 
+utils.readdir = async (localPath) => {
+    return new Promise((resolve, reject) => {
+        return fs.readdir(localPath, (err, files) => {
+            if(err){
+                reject(err)
+            }
+            resolve(files)
+        })
+    })
+}
+
 utils.getNormalize = (path, type) => {
     let entryObjSet = {}
     let entryArrSet = []
