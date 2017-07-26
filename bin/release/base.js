@@ -13,7 +13,7 @@ class Base extends Files{
     this.Cdn = new Cdn(...arg)
   }
 
-  getElement (distPath, elem) {
+  getElementObject (distPath, elem) {
     const data = this.getFilesNormalize(distPath, elem)
     return {
       name: elem,
