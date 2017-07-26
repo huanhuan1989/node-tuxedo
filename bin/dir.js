@@ -18,7 +18,7 @@ const dataCollection = MK_DIR_PATH.map(elem => (elem.split('/')))
     }, {max: -1, arr: [], other: new Set([])})
 
 /**
- * 第一种方法
+ * 第一种方法---获取所有的。。。
 */
 const dataAllArr = [...dataCollection.other]
 const lastDir = dataCollection.arr.reduce((last, elem, index) => {
@@ -55,7 +55,7 @@ const lastDir = dataCollection.arr.reduce((last, elem, index) => {
 console.log('----lastDir---', lastDir)
 
 /**
- * 第二种方法
+ * 第二种方法，只写了获取一级的
 */
 const PATH_COPY = MK_DIR_PATH.toString()
 const lastDir2 = dataCollection.arr.reduce((last, item, i) => {
