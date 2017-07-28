@@ -1,4 +1,5 @@
 import fs from 'fs'
+import promise from 'promise'
 
 /**
  * Files 
