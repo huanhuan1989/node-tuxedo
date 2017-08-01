@@ -1,6 +1,6 @@
 import { Base } from 'base'
 import { Cdn } from 'cdn'
-import config from 'config'
+import * as config from 'config'
 import promise from 'promise'
 
 /**
@@ -10,8 +10,11 @@ class Release extends Base{
 
     constructor (...arg) {
       super(...arg)
+      this.opts = arg[0]
+      this.srcPath = this.opts.src || config.options.src
+      this.distPath = this.opts.dist || config.options.dist
     }
-    
+
     static getLastImgSet (data) {
       const jpg = data['img']['jpg']
       const png = data['img']['png']
@@ -48,7 +51,9 @@ class Release extends Base{
 
     getArrayFilesByTypes (arr) {
       return arr
-        .map(super.getElementObject)
+        .map(data => {
+          super.getElementObject(this.opts.src || config.options.src, data)
+        })
         .reduce(reduceArrayFilesByTypes, {img: {}})
     }
     
@@ -94,7 +99,7 @@ class Release extends Base{
       }
       
       const jsTypeData = Object.assign({}, opts,{
-        reg: new RegExp(`(src|href)="(\/?\\w+\/.*?)"`, 'ig') 
+        reg: config.HREF_OR_SRC_REG
       })
 
       const cssTypeData = Object.assign({}, opts, {
@@ -180,16 +185,15 @@ class Release extends Base{
       }
     }
 
-    async createFilesToDir (data, rootPath) {
-      const distDirPath = `${rootPath}/online`
-      const files = await super.createDir(distDirPath)
-      files && writeFiles(data, distDirPath)
+    async createFilesToDir (data) {
+      const files = await super.createDir(this.distPath)
+      files && writeFiles(data, this.distPath)
       files && console.log('---files--write--done---')
     }
 
-    copyFiles (arr, rootPath) {
-      const devRootDirPath = `${rootPath}/output`
-      const distRootDirPath = `${rootPath}/online`
+    copyFiles (arr) {
+      const devRootDirPath = this.srcPath
+      const distRootDirPath = this.distPath
       return config.MK_DIR_PATH
         .map(item => ({ name: item, devDirPath: `${devRootDirPath}/${item}`, distDirPath: `${distRootDirPath}/${item}`}))
         .reduce(async (prev, current) => {
@@ -199,6 +203,10 @@ class Release extends Base{
           }
           return prev
         }, {})
+    }
+
+    getAllTypeFiles () {
+      return this.getArrayFilesByTypes(this.opts.filterType || config.FILTER_FILES_TYPE)
     }
 }
 
