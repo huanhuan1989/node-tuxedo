@@ -2,9 +2,9 @@ const MK_DIR_PATH = ['static', 'static/other', 'static/swf', 'static/swf/js', 's
 
 const arrayToObject = (arr) => {
     return arr.reduce((last, now, index) => {
-            last[index] = now
-            return last
-        }, {})
+        last[index] = now
+        return last
+    }, {})
 }
 const dataCollection = MK_DIR_PATH.map(elem => (elem.split('/')))
     .reduce((prev, current, index) => {
@@ -15,19 +15,19 @@ const dataCollection = MK_DIR_PATH.map(elem => (elem.split('/')))
         }
         prev.other.add(arrayToObject(current))
         return prev
-    }, {max: -1, arr: [], other: new Set([])})
+    }, { max: -1, arr: [], other: new Set([]) })
 
 /**
  * 第一种方法---获取所有的。。。
 */
 const dataAllArr = [...dataCollection.other]
 const lastDir = dataCollection.arr.reduce((last, elem, index) => {
-        let prevIndex = index
-        prevIndex -= 1
-        let _path = ''
-        if(prevIndex <= 0) prevIndex = 0
-        const lastData = dataAllArr
-            .reduce((prev, item, i) => {
+    let prevIndex = index
+    prevIndex -= 1
+    let _path = ''
+    if (prevIndex <= 0) prevIndex = 0
+    const lastData = dataAllArr
+        .reduce((prev, item, i) => {
             const keys = Object.keys(item)
             const keysLen = keys ? keys.length : 0
             const itemData = item[index]
@@ -36,10 +36,10 @@ const lastDir = dataCollection.arr.reduce((last, elem, index) => {
                     prev[itemData] = {}
                     prev[itemData]['count'] = 1
                     prev[itemData]['dir'] = ''
-                }else {
+                } else {
                     prev[itemData]['count'] += 1
                 }
-                
+
                 if (prev[itemData]['count'] > prev.max) {
                     prev['max'] = prev[itemData]['count']
                     prev['str'] = itemData
@@ -48,10 +48,10 @@ const lastDir = dataCollection.arr.reduce((last, elem, index) => {
                 prev[itemData]['dir'] = item[index] && (isHasItem ? `/${item[prevIndex]}/${itemData}` : `/${item[prevIndex]}`)
             }
             return prev
-        }, { max: -1, str: ''})
-        last.push(lastData)
-        return last
-    }, [])
+        }, { max: -1, str: '' })
+    last.push(lastData)
+    return last
+}, [])
 console.log('----lastDir---', lastDir)
 
 /**
@@ -61,7 +61,7 @@ const PATH_COPY = MK_DIR_PATH.toString()
 const lastDir2 = dataCollection.arr.reduce((last, item, i) => {
     const obj2 = MK_DIR_PATH.reduce((prev, current, index) => {
         const now = current.split(/,|\//)[i]
-        if(now){
+        if (now) {
             const reg = new RegExp(`${now}`, 'ig')
             const count = PATH_COPY.match(reg).length
             if (count > prev.max) {

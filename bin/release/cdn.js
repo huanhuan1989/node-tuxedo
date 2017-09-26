@@ -1,4 +1,4 @@
-import qcdn from '@q/qcdn'
+const qcdn = require('@q/qcdn')
 
 /**
  * Cdn 上传CDN
@@ -49,6 +49,4 @@ class Cdn {
 
 }
 
-export {
-  Cdn
-}
+module.exports = Cdn
