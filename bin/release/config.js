@@ -11,11 +11,5 @@ module.exports = {
     type: ['js', 'css', 'html', 'jpg', 'ico', 'png'],
     otherType: ['xml', 'swf'],
     mkDir: ['static', 'static/other', 'static/swf']
-  },
-  defaultCopyParam: {
-    from: '',
-    to: '',
-    toType: 'file',
-    create: ''
   }
 }
